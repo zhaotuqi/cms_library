@@ -14,6 +14,6 @@ class Cms extends Facade
 {
     protected static function getFacadeAccessor()
     {
-        return 'cms';
+        return 'Cms';
     }
 }

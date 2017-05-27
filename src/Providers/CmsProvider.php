@@ -30,7 +30,7 @@ class CmsProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton('cms', function(){
+        $this->app->singleton('Cms', function(){
             return new Cms();
         });
     }
