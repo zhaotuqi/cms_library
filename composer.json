@@ -12,6 +12,7 @@
     "minimum-stability": "stable",
     "require": {
         "php": ">=5.4.0",
+        "predis/predis": "^1.1",
         "library/common":"dev-master"
     },
     "autoload": {
