@@ -1,0 +1,32 @@
+{
+    "name": "library/cms",
+    "description": "公共类库-CMS使用库",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "huajian.liu",
+            "email": "huajian.liu@wenba100.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.4.0",
+        "library/common":"dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "repositories": {
+        "packagist": {
+            "type": "composer",
+            "url": "https://packagist.phpcomposer.com"
+        },
+        "wenba_packagist":{
+            "type": "composer",
+            "url": "http://packagist.xuebadev.com"
+        }
+    }
+}
