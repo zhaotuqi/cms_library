@@ -9,6 +9,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Config;
 use App\Libraries\Cms;
 
 class CmsProvider extends ServiceProvider
@@ -31,23 +32,19 @@ class CmsProvider extends ServiceProvider
             }
         }
 
-        $databaseConfig = file_get_contents(config_path('database.php'));
-        $dbConfigJson   = json_decode($databaseConfig, true);
-
-        $dbConfigJson['redis']['cms_qa'] = [
+        Config::set('database.cms_qa', [
             'host'     => '10.2.1.28',
             'password' => null,
             'port'     => 6380,
             'database' => 0
-        ];
-        $dbConfigJson['redis']['cms_on'] = [
+        ]);
+
+        Config::set('database.cms_on', [
             'host'     => '10.10.34.151',
             'password' => null,
             'port'     => 6379,
             'database' => 0
-        ];
-
-        file_put_contents(config_path('database.php'), json_encode($dbConfigJson));
+        ]);
     }
 
     /**
