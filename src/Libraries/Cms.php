@@ -35,8 +35,10 @@ class Cms
             'database' => 0
         ]);
 
+        var_dump("======");
         if (!$this->redisCMS) {
             $this->redisCMS = Redis::connection('cms_' . env('REDIS_CMS_ENV'));
+            var_dump($this->redisCMS);
         }
 
         if (!$this->configCMS) {
