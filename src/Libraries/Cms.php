@@ -12,28 +12,22 @@ use Illuminate\Support\Facades\Redis;
 
 class Cms
 {
-    //cms在redis中的config_key
     const CMS_CONFIG_KEY = 'cms_keys';
 
     protected $redisCMS;
+    protected $configCMS;
 
     public function __construct()
     {
-        echo "=======";
-        $this->redisCMS = Redis::connection('cms');
+        $this->redisCMS  = Redis::connection('cms_' . env('REDIS_CMS_ENV'));
+        $this->configCMS = config('cms.' . env('REDIS_CMS_ENV'));
     }
 
-    public function test()
+    public function getConfigFromCache($configKey)
     {
-        echo "测试通过啦！\n";
-        Redis::connection('cms');
-//        var_dump($this->redisCMS);
-    }
+        $config = $this->configCMS[$configKey];
+        $key    = 'cms_' . $config[0] . '_' . $config[1];
 
-    public function getConfigFromCache($configId, $tag)
-    {
-        $key = 'cms_' . $configId . '_' . $tag;
-
-//        return json_decode($this->redisCMS->hGet(CMS_CONFIG_KEY, $key), true);
+        return json_decode($this->redisCMS->hGet(CMS_CONFIG_KEY, $key), true);
     }
 }
