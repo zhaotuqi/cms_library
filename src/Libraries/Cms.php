@@ -37,13 +37,13 @@ class Cms
 
         var_dump("======");
         if (!$this->redisCMS) {
-            var_dump(config('database.redis.cms_' . env('REDIS_CMS_ENV')));
-            $this->redisCMS = Redis::connection('cms_' . env('REDIS_CMS_ENV'));
+            var_dump(config('database.redis.cms_' . config('cms.env')));
+            $this->redisCMS = Redis::connection('cms_' . config('cms.env'));
             var_dump($this->redisCMS);
         }
 
         if (!$this->configCMS) {
-            $this->configCMS = config('cms.' . env('REDIS_CMS_ENV'));
+            $this->configCMS = config('cms.' . config('cms.env'));
         }
     }
 
