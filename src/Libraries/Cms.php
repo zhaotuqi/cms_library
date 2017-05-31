@@ -18,7 +18,7 @@ class Cms
     protected $redisCMS;
     protected $configCMS;
 
-    public function __construct()
+    public function init()
     {
         //更新cms redis连接
         Config::set('database.redis.cms_qa', [
@@ -35,12 +35,19 @@ class Cms
             'database' => 0
         ]);
 
-        $this->redisCMS  = Redis::connection('cms_' . env('REDIS_CMS_ENV'));
-        $this->configCMS = config('cms.' . env('REDIS_CMS_ENV'));
+        if (!$this->redisCMS) {
+            $this->redisCMS = Redis::connection('cms_' . env('REDIS_CMS_ENV'));
+        }
+
+        if (!$this->configCMS) {
+            $this->configCMS = config('cms.' . env('REDIS_CMS_ENV'));
+        }
     }
 
     public function getConfigFromCache($configKey)
     {
+        $this->init();
+
         $config = $this->configCMS[$configKey];
         $key    = 'cms_' . $config[0] . '_' . $config[1];
 
