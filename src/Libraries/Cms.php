@@ -8,38 +8,34 @@
 
 namespace App\Libraries;
 
-use Illuminate\Support\Facades\Redis;
-use Illuminate\Support\Facades\Config;
+defined('CMS_REDIS_DB') or define('CMS_REDIS_DB', [
+    'qa' => [
+        'host'     => '10.2.1.28',
+        'password' => null,
+        'port'     => 6380,
+        'database' => 0
+    ],
+    'on' => [
+        'host'     => '10.10.34.151',
+        'password' => null,
+        'port'     => 6379,
+        'database' => 0
+    ]
+]);
+
+defined('CMS_CONFIG_KEY') or define('CMS_CONFIG_KEY', 'cms_keys');
 
 class Cms
 {
-    const CMS_CONFIG_KEY = 'cms_keys';
-
     protected $redisCMS;
     protected $configCMS;
 
-    public function init()
+    public function __construct()
     {
-        //更新cms redis连接
-        Config::set('database.redis.cms_qa', [
-            'host'     => '10.2.1.28',
-            'password' => null,
-            'port'     => 6380,
-            'database' => 0
-        ]);
-
-        Config::set('database.redis.cms_on', [
-            'host'     => '10.10.34.151',
-            'password' => null,
-            'port'     => 6379,
-            'database' => 0
-        ]);
-
-        var_dump("======");
         if (!$this->redisCMS) {
-            var_dump(config('database.redis.cms_' . config('cms.env')));
-            $this->redisCMS = Redis::connection('cms_' . config('cms.env'));
-            var_dump($this->redisCMS);
+            require base_path('vendor/predis/predis/autoload.php');
+
+            $this->redisCMS = new \Predis\Client(CMS_REDIS_DB[config('cms.env')]);
         }
 
         if (!$this->configCMS) {
@@ -49,11 +45,9 @@ class Cms
 
     public function getConfigFromCache($configKey)
     {
-        $this->init();
-
         $config = $this->configCMS[$configKey];
         $key    = 'cms_' . $config[0] . '_' . $config[1];
 
-        return json_decode($this->redisCMS->hGet(CMS_CONFIG_KEY, $key), true);
+        return json_decode($this->redisCMS->hget(CMS_CONFIG_KEY, $key), true);
     }
 }

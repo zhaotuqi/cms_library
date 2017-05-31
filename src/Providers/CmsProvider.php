@@ -21,15 +21,6 @@ class CmsProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([__DIR__ . '/../Config/cms.php' => config_path('cms.php')]);
-
-        $envContent = file_get_contents(base_path('.env'));
-        if (false == strrpos($envContent, 'REDIS_CMS_ENV')) {
-            if (App()->environment() == 'production' || App()->environment() == 'pro') {
-                file_put_contents(base_path('.env'), PHP_EOL . 'REDIS_CMS_ENV=on' . PHP_EOL, FILE_APPEND);
-            } else {
-                file_put_contents(base_path('.env'), PHP_EOL . 'REDIS_CMS_ENV=qa' . PHP_EOL, FILE_APPEND);
-            }
-        }
     }
 
     /**
