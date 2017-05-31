@@ -11,13 +11,13 @@ namespace App\Libraries;
 use Common;
 
 defined('CMS_REDIS_DB') or define('CMS_REDIS_DB', [
-    'qa' => [
+    'qa'  => [
         'host'     => '10.2.1.28',
         'password' => null,
         'port'     => 6380,
         'database' => 0
     ],
-    'on' => [
+    'pro' => [
         'host'     => '10.10.34.151',
         'password' => null,
         'port'     => 6379,
@@ -26,8 +26,8 @@ defined('CMS_REDIS_DB') or define('CMS_REDIS_DB', [
 ]);
 
 defined('CMS_SERVER') or define('CMS_SERVER', [
-    'qa' => 'http://cms-qa02.xuebadev.com/v1/configs/',
-    'on' => 'http://10.10.84.32:86/v1/configs/'
+    'qa'  => 'http://cms-qa02.xuebadev.com/v1/configs/',
+    'pro' => 'http://10.10.84.32:86/v1/configs/'
 ]);
 
 defined('CMS_CONFIG_KEY') or define('CMS_CONFIG_KEY', 'cms_keys');
