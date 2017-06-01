@@ -8,7 +8,7 @@
 
 namespace App\Libraries;
 
-use Common;
+use Common as CmsCommon;
 
 defined('CMS_REDIS_DB') or define('CMS_REDIS_DB', [
     'qa'  => [
@@ -57,7 +57,7 @@ class Cms
 
         $data = $this->redisCMS->hget(CMS_CONFIG_KEY, $key);
         if (!$data) {
-            @Common::query(CMS_SERVER[config('cms.env')] . $config[0] . '/' . $config[1], []);
+            @CmsCommon::query(CMS_SERVER[config('cms.env')] . $config[0] . '/' . $config[1], []);
             $data = $this->redisCMS->hget(CMS_CONFIG_KEY, $key);
         }
 
