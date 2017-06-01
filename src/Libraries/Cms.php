@@ -50,7 +50,7 @@ class Cms
         }
     }
 
-    public function getConfigFromCache($configKey)
+    public function getConfigFromCache($configKey, $isFilter = true)
     {
         $config = $this->configCMS[$configKey];
         $key    = 'cms_' . $config[0] . '_' . $config[1];
@@ -59,6 +59,10 @@ class Cms
         if (!$data) {
             @CmsCommon::query(CMS_SERVER[config('cms.env')] . $config[0] . '/' . $config[1], []);
             $data = $this->redisCMS->hget(CMS_CONFIG_KEY, $key);
+        }
+
+        if ($isFilter) {
+            return json_decode(json_decode($data, true)['data'], true);
         }
 
         return json_decode($data, true);
