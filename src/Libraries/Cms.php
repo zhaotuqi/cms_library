@@ -59,6 +59,10 @@ class Cms
         if (!$data) {
             @CmsCommon::query(CMS_SERVER[config('cms.env')] . $config[0] . '/' . $config[1], []);
             $data = $this->redisCMS->hget(CMS_CONFIG_KEY, $key);
+            if (!$data)
+            {
+                return '配置不存在';
+            }
         }
 
         if ($isFilter) {
