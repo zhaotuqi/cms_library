@@ -56,10 +56,10 @@ class Cms
         $key    = 'cms_' . $config[0] . '_' . $config[1];
 
         $data = $this->redisCMS->hget(CMS_CONFIG_KEY, $key);
-        if (!$data) {
+        if (empty($data)) {
             @CmsCommon::query(CMS_SERVER[config('cms.env')] . $config[0] . '/' . $config[1], []);
             $data = $this->redisCMS->hget(CMS_CONFIG_KEY, $key);
-            if (!$data)
+            if (empty($data))
             {
                 return '配置不存在';
             }
