@@ -12,9 +12,9 @@ use Common as CmsCommon;
 
 defined('CMS_REDIS_DB') or define('CMS_REDIS_DB', [
     'qa'  => [
-        'host'     => '10.2.1.28',
-        'password' => null,
-        'port'     => 6380,
+        'host'     => '10.9.103.15',
+        'password' => 'FhPVixF4giXz0ECxUHiYF4UEAJCC0HNZ',
+        'port'     => 6379,
         'database' => 0
     ],
     'pro' => [
