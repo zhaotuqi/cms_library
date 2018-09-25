@@ -52,6 +52,9 @@ class Cms
 
     public function getConfigFromCache($configKey, $isFilter = true)
     {
+        if (null == $this->configCMS || !isset($this->configCMS[$configKey])) {
+            return false;
+        }
         $config = $this->configCMS[$configKey];
         $key    = 'cms_' . $config[0] . '_' . $config[1];
 
