@@ -91,10 +91,10 @@ class Cms
     }
 
     static private function setToApcu($key, $value) {
-        if (strlen($key) <= 0) {
+        if (strlen($key) <= 0 || false == function_exists("apcu_exists")) {
             return false;
         }
-        $TTL = 600; // 10分钟
+        $TTL = 7200; // 2个小时
         return apcu_add($key, $value, $TTL);
     }
 
