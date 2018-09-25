@@ -55,14 +55,16 @@ class Cms
         $config = $this->configCMS[$configKey];
         $key    = 'cms_' . $config[0] . '_' . $config[1];
 
-        $data = $this->redisCMS->hget(CMS_CONFIG_KEY, $key);
-        if (!json_decode($data)) {
-            @CmsCommon::query(CMS_SERVER[config('cms.env')] . $config[0] . '/' . $config[1], []);
+        // 先从apcu中获取
+        $data = self::getFromApcu($key);
+        if (false === $data) {
+            // 没有或错误的话从redis中获取
             $data = $this->redisCMS->hget(CMS_CONFIG_KEY, $key);
-            if (!json_decode($data))
-            {
+            if (!json_decode($data)) {
                 return '配置不存在';
             }
+            // 设置到apcu中
+            self::setToApcu($key, $data);
         }
 
         if ($isFilter) {
@@ -71,4 +73,29 @@ class Cms
 
         return json_decode($data, true);
     }
+
+    static private function getFromApcu($key) {
+        if (strlen($key) <= 0 || false == function_exists("apcu_exists")) {
+            return false;
+        }
+
+        if (false == apcu_exists($key)) {
+            return false;
+        }
+
+        $value = apcu_fetch($key, $success);
+        if (false == $success) {
+            return false;
+        }
+        return $value;
+    }
+
+    static private function setToApcu($key, $value) {
+        if (strlen($key) <= 0) {
+            return false;
+        }
+        $TTL = 600; // 10分钟
+        return apcu_add($key, $value, $TTL);
+    }
+
 }
