@@ -56,6 +56,9 @@ class Cms
             return false;
         }
         $config = $this->configCMS[$configKey];
+        if (count($config) != 2) {
+            return false;
+        }
         $key    = 'cms_' . $config[0] . '_' . $config[1];
 
         // 先从apcu中获取
@@ -64,7 +67,7 @@ class Cms
             // 没有或错误的话从redis中获取
             $data = $this->redisCMS->hget(CMS_CONFIG_KEY, $key);
             if (!json_decode($data)) {
-                return '配置不存在';
+                return false;
             }
             // 设置到apcu中
             self::setToApcu($key, $data);
