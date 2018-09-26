@@ -100,7 +100,7 @@ class Cms
         if (strlen($key) <= 0 || false == function_exists("apcu_exists")) {
             return false;
         }
-        $TTL = 7200; // 2个小时
+        $TTL = 600; // 10分钟
         return apcu_add($key, $value, $TTL);
     }
 
