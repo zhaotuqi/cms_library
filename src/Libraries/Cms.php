@@ -8,12 +8,16 @@
 
 namespace App\Libraries;
 
-use Common as CmsCommon;
-
 defined('CMS_REDIS_DB') or define('CMS_REDIS_DB', [
     'qa'  => [
         'host'     => '10.9.103.15',
         'password' => 'FhPVixF4giXz0ECxUHiYF4UEAJCC0HNZ',
+        'port'     => 6379,
+        'database' => 0
+    ],
+    'pre' => [
+        'host'     => '10.21.84.226',
+        'password' => 'L8JgMGrQBt87qPuYMV4d',
         'port'     => 6379,
         'database' => 0
     ],
@@ -24,13 +28,6 @@ defined('CMS_REDIS_DB') or define('CMS_REDIS_DB', [
         'database' => 0
     ]
 ]);
-
-defined('CMS_SERVER') or define('CMS_SERVER', [
-    'qa'  => 'http://cms-qa02.xuebadev.com/v1/configs/',
-    'pro' => 'http://10.10.84.32:86/v1/configs/'
-]);
-
-defined('CMS_CONFIG_KEY') or define('CMS_CONFIG_KEY', 'cms_keys');
 
 class Cms
 {
@@ -47,6 +44,10 @@ class Cms
 
         if (!$this->configCMS) {
             $this->configCMS = config('cms.' . config('cms.env'));
+            if (null == $this->configCMS) {
+                // 如果对应的 env 在 cms.php 中不存在，则使用 pro 的
+                $this->configCMS = config('cms.pro');
+            }
         }
     }
 
@@ -65,7 +66,7 @@ class Cms
         $data = self::getFromApcu($key);
         if (false === $data) {
             // 没有或错误的话从redis中获取
-            $data = $this->redisCMS->hget(CMS_CONFIG_KEY, $key);
+            $data = $this->redisCMS->hget("cms_keys", $key);
             if (!json_decode($data)) {
                 return false;
             }
