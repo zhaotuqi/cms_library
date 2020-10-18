@@ -18,9 +18,9 @@ class Cms
     public function __construct()
     {
         $redisHost = env('REDIS_HOST');
-        $redisPassword = env('REDIS_PASSWORD');
-        $redisPort = env('REDIS_PORT');
-        $redisDB = env('REDIS_DB');
+        $redisPassword = env('REDIS_PASSWORD','');
+        $redisPort = env('REDIS_PORT',6379);
+        $redisDB = env('REDIS_DB',0);
 
         $checkConfigMsg = "";
         $checkConfigMsg .= empty($redisHost) ? ".env文件 CMS选项： REDIS_HOST 未配置" . PHP_EOL : "";
