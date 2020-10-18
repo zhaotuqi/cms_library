@@ -23,12 +23,12 @@ class Cms
         $redisDB = env('REDIS_DB',0);
 
         $checkConfigMsg = "";
-        $checkConfigMsg .= empty($redisHost) ? ".env文件 CMS选项： REDIS_HOST 未配置" . PHP_EOL : "";
-        $checkConfigMsg .= (!isset($redisPassword)) ? ".env文件 CMS选项： REDIS_PASSWORD 未配置" . PHP_EOL : "";
-        $checkConfigMsg .= empty($redisPort) ? ".env文件 CMS选项： REDIS_PORT 未配置" . PHP_EOL : "";
-        $checkConfigMsg .= !isset($redisDB) ? ".env文件 CMS选项： REDIS_DB 未配置" . PHP_EOL : "";
+        $checkConfigMsg .= empty($redisHost) ? ".env文件： REDIS_HOST 未配置" . PHP_EOL : "";
+        $checkConfigMsg .= (!isset($redisPassword)) ? ".env文件： REDIS_PASSWORD 未配置" . PHP_EOL : "";
+        $checkConfigMsg .= empty($redisPort) ? ".env文件： REDIS_PORT 未配置" . PHP_EOL : "";
+        $checkConfigMsg .= !isset($redisDB) ? ".env文件： REDIS_DB 未配置" . PHP_EOL : "";
         if (!empty($checkConfigMsg)) {
-            throw new \Exception('CMS 配置选项检测结果：' . PHP_EOL . $checkConfigMsg);
+            throw new \Exception('CMS 配置检测结果' . PHP_EOL . $checkConfigMsg);
         }
 
         $this->redisCMS = new Client([
