@@ -8,7 +8,26 @@
 
 namespace App\Libraries;
 
-use Predis\Client;
+defined('CMS_REDIS_DB') or define('CMS_REDIS_DB', [
+    'qa'  => [
+        'host'     => '10.9.103.15',
+        'password' => 'FhPVixF4giXz0ECxUHiYF4UEAJCC0HNZ',
+        'port'     => 6379,
+        'database' => 0
+    ],
+    'pre' => [
+        'host'     => '10.21.84.226',
+        'password' => 'L8JgMGrQBt87qPuYMV4d',
+        'port'     => 6379,
+        'database' => 0
+    ],
+    'pro' => [
+        'host'     => '10.10.34.151',
+        'password' => null,
+        'port'     => 6379,
+        'database' => 0
+    ]
+]);
 
 class Cms
 {
@@ -17,27 +36,19 @@ class Cms
 
     public function __construct()
     {
-        $redisHost = env('REDIS_HOST');
-        $redisPassword = env('REDIS_PASSWORD','');
-        $redisPort = env('REDIS_PORT',6379);
-        $redisDB = env('REDIS_DB',0);
 
-        $checkConfigMsg = "";
-        $checkConfigMsg .= empty($redisHost) ? ".env文件 CMS选项： REDIS_HOST 未配置" . PHP_EOL : "";
-        $checkConfigMsg .= (!isset($redisPassword)) ? ".env文件 CMS选项： REDIS_PASSWORD 未配置" . PHP_EOL : "";
-        $checkConfigMsg .= empty($redisPort) ? ".env文件 CMS选项： REDIS_PORT 未配置" . PHP_EOL : "";
-        $checkConfigMsg .= !isset($redisDB) ? ".env文件 CMS选项： REDIS_DB 未配置" . PHP_EOL : "";
-        if (!empty($checkConfigMsg)) {
-            throw new \Exception('CMS 配置选项检测结果：' . PHP_EOL . $checkConfigMsg);
+        if (!$this->redisCMS) {
+            require base_path('vendor/predis/predis/autoload.php');
+            $this->redisCMS = new \Predis\Client(CMS_REDIS_DB[config('cms.env')]);
         }
 
-        $this->redisCMS = new Client([
-            'host'     => $redisHost,
-            'password' => $redisPassword,
-            'port'     => $redisPort,
-            'database' => $redisDB
-        ]);
-        $this->configCMS = config('cms.' . config('cms.env'));
+        if (!$this->configCMS) {
+            $this->configCMS = config('cms.' . config('cms.env'));
+            if (null == $this->configCMS) {
+                // 如果对应的 env 在 cms.php 中不存在，则使用 pro 的
+                $this->configCMS = config('cms.pro');
+            }
+        }
     }
 
     public function getConfigFromCache($configKey, $isFilter = true)
