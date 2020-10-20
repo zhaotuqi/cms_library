@@ -45,7 +45,7 @@ class Cms
             /*
                 REDIS_CMS_IS_OPEN=1
                 REDIS_CMS_HOST=
-                REDIS_CMS_PASSWORD=
+                REDIS_CMS_PASSWORD=NULL
                 REDIS_CMS_PORT=6379
                 REDIS_CMS_DB_NUMBER=0
 
@@ -53,7 +53,7 @@ class Cms
             $redisHost = env('REDIS_CMS_HOST');
             $redisPassword = env('REDIS_CMS_PASSWORD');
             $redisPort = env('REDIS_CMS_PORT');
-            $redisDBNumber = env('REDIS_CMS_DB_NUMBER');
+            $redisDBNumber = env('REDIS_CMS_DB_NUMBER',0);
 
             $checkConfigMsg = "";
             $checkConfigMsg .= empty($redisHost) ? ".env文件 CMS选项： REDIS_HOST 未配置" . PHP_EOL : "";
