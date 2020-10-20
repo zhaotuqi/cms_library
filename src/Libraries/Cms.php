@@ -9,20 +9,20 @@
 namespace App\Libraries;
 
 defined('CMS_REDIS_DB') or define('CMS_REDIS_DB', [
-    'qa' => [
-        'host' => '10.9.103.15',
+    'qa'  => [
+        'host'     => 'fudao-predb-qa02-redis-rw.wenba100.com',
         'password' => 'FhPVixF4giXz0ECxUHiYF4UEAJCC0HNZ',
         'port' => 6379,
         'database' => 0
     ],
     'pre' => [
-        'host' => '10.21.84.226',
+        'host'     => 'fudao-predb-cms-redis-rw.wenba100.com',
         'password' => 'L8JgMGrQBt87qPuYMV4d',
         'port' => 6379,
         'database' => 0
     ],
     'pro' => [
-        'host' => '10.10.34.151',
+        'host'     => 'fudao-cms-redis-rw.wenba100.com',
         'password' => null,
         'port' => 6379,
         'database' => 0
@@ -41,7 +41,7 @@ class Cms
     {
         $redisConfig = [];
         if (env('REDIS_CMS_IS_OPEN')) {
-            //这里是为了移除上面写死的固定IP， 请在项目的 .env中添加如下配置
+            //这里是为了移除上面写死的固定IP， 请在项目的 .env 中添加 如下配置
             /*
                 REDIS_CMS_IS_OPEN=1
                 REDIS_CMS_HOST=
@@ -57,7 +57,6 @@ class Cms
 
             $checkConfigMsg = "";
             $checkConfigMsg .= empty($redisHost) ? ".env文件 CMS选项： REDIS_HOST 未配置" . PHP_EOL : "";
-            $checkConfigMsg .= (!isset($redisPassword)) ? ".env文件 CMS选项： REDIS_PASSWORD 未配置" . PHP_EOL : "";
             $checkConfigMsg .= empty($redisPort) ? ".env文件 CMS选项： REDIS_PORT 未配置" . PHP_EOL : "";
             $checkConfigMsg .= !isset($redisDBNumber) ? ".env文件 CMS选项： REDIS_CMS_DB_NUMBER" . PHP_EOL : "";
             if (!empty($checkConfigMsg)) {
