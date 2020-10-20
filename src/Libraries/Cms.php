@@ -9,25 +9,28 @@
 namespace App\Libraries;
 
 defined('CMS_REDIS_DB') or define('CMS_REDIS_DB', [
-    'qa'  => [
-        'host'     => '10.9.103.15',
+    'qa' => [
+        'host' => '10.9.103.15',
         'password' => 'FhPVixF4giXz0ECxUHiYF4UEAJCC0HNZ',
-        'port'     => 6379,
+        'port' => 6379,
         'database' => 0
     ],
     'pre' => [
-        'host'     => '10.21.84.226',
+        'host' => '10.21.84.226',
         'password' => 'L8JgMGrQBt87qPuYMV4d',
-        'port'     => 6379,
+        'port' => 6379,
         'database' => 0
     ],
     'pro' => [
-        'host'     => '10.10.34.151',
+        'host' => '10.10.34.151',
         'password' => null,
-        'port'     => 6379,
+        'port' => 6379,
         'database' => 0
     ]
 ]);
+
+use  \Predis\Client;
+use Log;
 
 class Cms
 {
@@ -36,16 +39,49 @@ class Cms
 
     public function __construct()
     {
+        $redisConfig = [];
+        if (env('REDIS_CMS_IS_OPEN')) {
+            //这里是为了移除上面写死的固定IP， 请在项目的 .env中添加如下配置
+            /*
+                REDIS_CMS_IS_OPEN=1
+                REDIS_CMS_HOST=
+                REDIS_CMS_PASSWORD=
+                REDIS_CMS_PORT=6379
+                REDIS_CMS_DB_NUMBER=0
 
+             */
+            $redisHost = env('REDIS_CMS_HOST');
+            $redisPassword = env('REDIS_CMS_PASSWORD');
+            $redisPort = env('REDIS_CMS_PORT');
+            $redisDBNumber = env('REDIS_CMS_DB_NUMBER');
+
+            $checkConfigMsg = "";
+            $checkConfigMsg .= empty($redisHost) ? ".env文件 CMS选项： REDIS_HOST 未配置" . PHP_EOL : "";
+            $checkConfigMsg .= (!isset($redisPassword)) ? ".env文件 CMS选项： REDIS_PASSWORD 未配置" . PHP_EOL : "";
+            $checkConfigMsg .= empty($redisPort) ? ".env文件 CMS选项： REDIS_PORT 未配置" . PHP_EOL : "";
+            $checkConfigMsg .= !isset($redisDBNumber) ? ".env文件 CMS选项： REDIS_CMS_DB_NUMBER" . PHP_EOL : "";
+            if (!empty($checkConfigMsg)) {
+                throw new \Exception('CMS redis 配置项缺失告警：' . PHP_EOL . $checkConfigMsg);
+            }
+            $redisConfig = [
+                'host' => $redisHost,
+                'password' => $redisPassword,
+                'port' => $redisPort,
+                'database' => $redisDBNumber
+            ];
+        } else {
+            $redisConfig = CMS_REDIS_DB[config('cms.env')];
+        }
         if (!$this->redisCMS) {
-            require base_path('vendor/predis/predis/autoload.php');
-            $this->redisCMS = new \Predis\Client(CMS_REDIS_DB[config('cms.env')]);
+            $this->redisCMS = new Client($redisConfig);
         }
 
         if (!$this->configCMS) {
+            $cmsKey='cms.' . config('cms.env');
             $this->configCMS = config('cms.' . config('cms.env'));
             if (null == $this->configCMS) {
                 // 如果对应的 env 在 cms.php 中不存在，则使用 pro 的
+                Log::info('cms.php中不存在key:'.$cmsKey.'，使用线上的cms-pro 配置，提示信息所在文件'.__FILE__.':'.__LINE__);
                 $this->configCMS = config('cms.pro');
             }
         }
@@ -60,7 +96,7 @@ class Cms
         if (count($config) != 2) {
             return false;
         }
-        $key    = 'cms_' . $config[0] . '_' . $config[1];
+        $key = 'cms_' . $config[0] . '_' . $config[1];
 
         // 先从apcu中获取
         $data = self::getFromApcu($key);
@@ -81,7 +117,8 @@ class Cms
         return json_decode($data, true);
     }
 
-    static private function getFromApcu($key) {
+    static private function getFromApcu($key)
+    {
         if (strlen($key) <= 0 || false == function_exists("apcu_exists")) {
             return false;
         }
@@ -97,7 +134,8 @@ class Cms
         return $value;
     }
 
-    static private function setToApcu($key, $value) {
+    static private function setToApcu($key, $value)
+    {
         if (strlen($key) <= 0 || false == function_exists("apcu_exists")) {
             return false;
         }
