@@ -102,7 +102,7 @@ class Cms
                 if ($e instanceof ConnectionException) {
                     if (preg_match('/Error while reading line from the server/', $e->getMessage())) {
                         //元字符+限定符+修饰符
-                        echo '重试' . ($i + 1) . '次';
+                       // echo '重试' . ($i + 1) . '次';
                         if ($i < 3) {
                             $i++;
                             goto A;
