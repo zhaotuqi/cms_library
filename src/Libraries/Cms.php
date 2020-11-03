@@ -36,6 +36,7 @@ use Predis\Connection\ConnectionException;
 class Cms
 {
     protected $redisCMS;
+    protected $redisConnectionConfig;
     protected $configCMS;
 
     public function __construct()
@@ -71,7 +72,8 @@ class Cms
         } else {
             $redisConfig = CMS_REDIS_DB[config('cms.env')];
         }
-        $this->redisCMS = new Client($redisConfig);
+        $this->redisConnectionConfig = $redisConfig;
+
         $cmsKey = 'cms.' . config('cms.env');
         $this->configCMS = config('cms.' . config('cms.env'));
         if (null == $this->configCMS) {
@@ -83,7 +85,7 @@ class Cms
 
     public function getConfigFromCache($configKey, $isFilter = true)
     {
-
+        $this->redisCMS = new Client($this->redisConnectionConfig);
         if (empty($this->configCMS[$configKey]) || (count($this->configCMS[$configKey]) !== 2)) {
             return [];
         }
@@ -102,7 +104,7 @@ class Cms
                 if ($e instanceof ConnectionException) {
                     if (preg_match('/Error while reading line from the server/', $e->getMessage())) {
                         //元字符+限定符+修饰符
-                       // echo '重试' . ($i + 1) . '次';
+                        // echo '重试' . ($i + 1) . '次';
                         if ($i < 3) {
                             $i++;
                             goto A;
