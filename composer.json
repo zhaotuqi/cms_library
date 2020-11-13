@@ -11,6 +11,14 @@
     ],
     "minimum-stability": "stable",
     "require": {
+        "ext-curl": "*",
+        "ext-json": "*",
+        "ext-libxml": "*",
+        "ext-openssl": "*",
+        "ext-mbstring": "*",
+        "ext-xmlwriter":"*",
+        "ext-simplexml":"*",
+        "ext-fileinfo": "*",
         "php": ">=5.4.0",
         "predis/predis": "^1.1",
         "library/common":">1.0.10"

@@ -136,16 +136,16 @@ class Cms
     static private function getFromApcu($key)
     {
         if (strlen($key) <= 0 || false == function_exists("apcu_exists")) {
-            return [];
+            return false;
         }
 
         if (false == apcu_exists($key)) {
-            return [];
+            return false;
         }
 
         $value = apcu_fetch($key, $success);
         if (false == $success) {
-            return [];
+            return false;
         }
         return $value;
     }
