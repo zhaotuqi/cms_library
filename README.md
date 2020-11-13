@@ -7,7 +7,7 @@
 
 ## 请在项目.env配置里添加如下配置
 
-```shell script
+```
 
 REDIS_CMS_IS_OPEN=1 
 REDIS_CMS_HOST=127.0.0.0 #换成自己服务的redis 地址
