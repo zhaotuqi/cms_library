@@ -43,7 +43,8 @@ class Cms
     {
         $redisConfig = [];
         if (env('REDIS_CMS_IS_OPEN')) {
-            //这里是为了移除上面写死的固定redis 地址， 请在项目的 .env 中添加 如下配置
+            //这里是为了移除上面写死的固定redis 地址，
+            // 请在项目的 .env 中添加 如下配置：
             /*
                 REDIS_CMS_IS_OPEN=1
                 REDIS_CMS_HOST=
@@ -70,15 +71,18 @@ class Cms
                 'database' => $redisDBNumber
             ];
         } else {
+            // 项目的.env 配置项  REDIS_CMS_ENV=qa
+            // 配置所在文件： app/config/cms.php
             $redisConfig = CMS_REDIS_DB[config('cms.env')];
         }
+
         $this->redisConnectionConfig = $redisConfig;
 
         $cmsKey = 'cms.' . config('cms.env');
         $this->configCMS = config('cms.' . config('cms.env'));
-        if (null == $this->configCMS) {
+        if (empty($this->configCMS)) {
             // 如果对应的 env 在 cms.php 中不存在，报错
-            Log::error('cms.php中不存在key:' . $cmsKey . '，提示信息所在文件' . __FILE__ . ':' . __LINE__);
+            Log::error('cms.php 中不存在key:' . $cmsKey . '，提示信息所在文件' . __FILE__ . ':' . __LINE__);
             $this->configCMS = [];
         }
     }
