@@ -9,20 +9,20 @@
 namespace App\Libraries;
 
 defined('CMS_REDIS_DB') or define('CMS_REDIS_DB', [
-    'qa'  => [
-        'host'     => 'fudao-predb-qa02-redis-rw.wenba100.com',
+    'qa' => [
+        'host' => 'fudao-predb-qa02-redis-rw.wenba100.com',
         'password' => 'FhPVixF4giXz0ECxUHiYF4UEAJCC0HNZ',
         'port' => 6379,
         'database' => 0
     ],
     'pre' => [
-        'host'     => 'fudao-predb-cms-redis-rw.wenba100.com',
+        'host' => 'fudao-predb-cms-redis-rw.wenba100.com',
         'password' => 'L8JgMGrQBt87qPuYMV4d',
         'port' => 6379,
         'database' => 0
     ],
     'pro' => [
-        'host'     => 'fudao-cms-redis-rw.wenba100.com',
+        'host' => 'fudao-cms-redis-rw.wenba100.com',
         'password' => null,
         'port' => 6379,
         'database' => 0
@@ -31,17 +31,20 @@ defined('CMS_REDIS_DB') or define('CMS_REDIS_DB', [
 
 use  \Predis\Client;
 use Log;
+use Predis\Connection\ConnectionException;
 
 class Cms
 {
     protected $redisCMS;
+    protected $redisConnectionConfig;
     protected $configCMS;
 
     public function __construct()
     {
         $redisConfig = [];
         if (env('REDIS_CMS_IS_OPEN')) {
-            //这里是为了移除上面写死的固定IP， 请在项目的 .env 中添加 如下配置
+            //这里是为了移除上面写死的固定redis 地址，
+            // 请在项目的 .env 中添加 如下配置：
             /*
                 REDIS_CMS_IS_OPEN=1
                 REDIS_CMS_HOST=
@@ -53,12 +56,11 @@ class Cms
             $redisHost = env('REDIS_CMS_HOST');
             $redisPassword = env('REDIS_CMS_PASSWORD');
             $redisPort = env('REDIS_CMS_PORT');
-            $redisDBNumber = env('REDIS_CMS_DB_NUMBER',0);
+            $redisDBNumber = env('REDIS_CMS_DB_NUMBER', 0);
 
             $checkConfigMsg = "";
             $checkConfigMsg .= empty($redisHost) ? ".env文件 CMS选项： REDIS_HOST 未配置" . PHP_EOL : "";
             $checkConfigMsg .= empty($redisPort) ? ".env文件 CMS选项： REDIS_PORT 未配置" . PHP_EOL : "";
-            $checkConfigMsg .= !isset($redisDBNumber) ? ".env文件 CMS选项： REDIS_CMS_DB_NUMBER" . PHP_EOL : "";
             if (!empty($checkConfigMsg)) {
                 throw new \Exception('CMS redis 配置项缺失告警：' . PHP_EOL . $checkConfigMsg);
             }
@@ -69,41 +71,57 @@ class Cms
                 'database' => $redisDBNumber
             ];
         } else {
+            // 项目的.env 配置项  REDIS_CMS_ENV=qa
+            // 配置所在文件： app/config/cms.php
             $redisConfig = CMS_REDIS_DB[config('cms.env')];
         }
-        if (!$this->redisCMS) {
-            $this->redisCMS = new Client($redisConfig);
-        }
 
-        if (!$this->configCMS) {
-            $cmsKey='cms.' . config('cms.env');
-            $this->configCMS = config('cms.' . config('cms.env'));
-            if (null == $this->configCMS) {
-                // 如果对应的 env 在 cms.php 中不存在，则使用 pro 的
-                Log::info('cms.php中不存在key:'.$cmsKey.'，使用线上的cms-pro 配置，提示信息所在文件'.__FILE__.':'.__LINE__);
-                $this->configCMS = config('cms.pro');
-            }
+        $this->redisConnectionConfig = $redisConfig;
+
+        $cmsKey = 'cms.' . config('cms.env');
+        $this->configCMS = config('cms.' . config('cms.env'));
+        if (empty($this->configCMS)) {
+            // 如果对应的 env 在 cms.php 中不存在，报错
+            Log::error('cms.php 中不存在key:' . $cmsKey . '，提示信息所在文件' . __FILE__ . ':' . __LINE__);
+            $this->configCMS = [];
         }
     }
 
     public function getConfigFromCache($configKey, $isFilter = true)
     {
-        if (null == $this->configCMS || !isset($this->configCMS[$configKey])) {
-            return false;
+        $this->redisCMS = new Client($this->redisConnectionConfig);
+        if (empty($this->configCMS[$configKey]) || (count($this->configCMS[$configKey]) !== 2)) {
+            return [];
         }
         $config = $this->configCMS[$configKey];
-        if (count($config) != 2) {
-            return false;
-        }
         $key = 'cms_' . $config[0] . '_' . $config[1];
 
         // 先从apcu中获取
         $data = self::getFromApcu($key);
         if (false === $data) {
-            // 没有或错误的话从redis中获取
-            $data = $this->redisCMS->hget("cms_keys", $key);
-            if (!json_decode($data)) {
-                return false;
+            //缓存里没有或错误的话从redis中获取
+            try {
+                $i = 0;
+                A:
+                $data = $this->redisCMS->hget("cms_keys", $key);
+            } catch (\Exception $e) {
+                if ($e instanceof ConnectionException) {
+                    if (preg_match('/Error while reading line from the server/', $e->getMessage())) {
+                        //元字符+限定符+修饰符
+                        // echo '重试' . ($i + 1) . '次';
+                        if ($i < 3) {
+                            $i++;
+                            goto A;
+                        }
+                    } else { //接着抛错误
+                        throw new \Exception($e->getMessage(), $e->getCode());
+                    }
+                } else {//接着抛错误
+                    throw new \Exception($e->getMessage(), $e->getCode());
+                }
+            }
+            if (!json_decode($data, true)) {
+                return [];
             }
             // 设置到apcu中
             self::setToApcu($key, $data);
@@ -112,7 +130,6 @@ class Cms
         if ($isFilter) {
             return json_decode(json_decode($data, true)['data'], true);
         }
-
         return json_decode($data, true);
     }
 
