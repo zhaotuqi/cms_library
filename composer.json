@@ -1,12 +1,12 @@
 {
-    "name": "library/cms",
+    "name": "zhaotuqi/cms",
     "description": "公共类库-CMS使用库",
     "type": "library",
     "license": "MIT",
     "authors": [
         {
-            "name": "huajian.liu",
-            "email": "huajian.liu@wenba100.com"
+            "name": "zhaoli",
+            "email": "zhaoli@163.com"
         }
     ],
     "minimum-stability": "stable",
@@ -21,7 +21,7 @@
         "ext-fileinfo": "*",
         "php": ">=5.4.0",
         "predis/predis": "^1.1",
-        "library/common":">1.0.10"
+        "zhaotuqi/common":"dev-master"
     },
     "autoload": {
         "psr-4": {
@@ -36,10 +36,6 @@
         "packagist": {
             "type": "composer",
             "url": "https://mirrors.aliyun.com/composer/"
-        },
-        "wenba_packagist":{
-            "type": "composer",
-            "url": "http://packagist.xuebadev.com"
         }
     }
 }
